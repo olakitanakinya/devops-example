@@ -29,15 +29,33 @@ pipeline {
 
                             # Extract directory from KUBECONFIG path for additional files
                             KUBE_DIR=\$(dirname "${KUBECONFIG_FILE}")
-                            cp \${KUBE_DIR}/client.crt ${kubeconfigDir}/client.crt
-                            cp \${KUBE_DIR}/client.key ${kubeconfigDir}/client.key
+
+                            echo "Copying client certificate and key files from \${KUBE_DIR} to ${kubeconfigDir}"
+
+                            # List files in KUBE_DIR for debugging
+                            echo "Listing files in \${KUBE_DIR}:"
+                            ls -la \${KUBE_DIR}
+
+                            if [ -f "\${KUBE_DIR}/client.crt" ]; then
+                                cp \${KUBE_DIR}/client.crt ${kubeconfigDir}/client.crt
+                            else
+                                echo "client.crt not found in \${KUBE_DIR}"
+                                exit 1
+                            fi
+
+                            if [ -f "\${KUBE_DIR}/client.key" ]; then
+                                cp \${KUBE_DIR}/client.key ${kubeconfigDir}/client.key
+                            else
+                                echo "client.key not found in \${KUBE_DIR}"
+                                exit 1
+                            fi
 
                             sed -i 's|/home/ola/.minikube/profiles/minikube/|${kubeconfigDir}/|g' ${kubeconfigDir}/config
 
                             echo "KUBECONFIG file content:"
                             cat ${kubeconfigDir}/config
 
-                            echo "Directory listing:"
+                            echo "Directory listing of ${kubeconfigDir}:"
                             ls -la ${kubeconfigDir}
 
                             export KUBECONFIG=${kubeconfigDir}/config
