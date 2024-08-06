@@ -6,21 +6,9 @@ pipeline {
     }
 
     stages {
-        stage('Declarative: Checkout SCM') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Checkout SCM') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Clone Repository') {
-            steps {
-                git url: 'https://github.com/olakitanakinya/devops-example.git', branch: 'master'
             }
         }
 
@@ -40,12 +28,13 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_FILE')]) {
                     script {
-                        def kubeConfigDir = '/var/lib/jenkins/workspace/devops-example/tmp-kubeconfig'
+                        // Create a temporary directory for kubeconfig
+                        def kubeconfigDir = "${pwd()}/tmp-kubeconfig"
                         sh """
-                            mkdir -p ${kubeConfigDir}
-                            chmod 700 ${kubeConfigDir}
-                            cp ${KUBECONFIG_FILE} ${kubeConfigDir}/config
-                            export KUBECONFIG=${kubeConfigDir}/config
+                            mkdir -p ${kubeconfigDir}
+                            chmod 700 ${kubeconfigDir}
+                            cp ${KUBECONFIG_FILE} ${kubeconfigDir}/config
+                            export KUBECONFIG=${kubeconfigDir}/config
                             kubectl apply -f deployment.yaml
                         """
                     }
