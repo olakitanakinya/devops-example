@@ -17,58 +17,18 @@ pipeline {
             }
         }
         stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_FILE')]) {
-                    script {
-                        def workspace = pwd()
-                        def kubeconfigDir = "${workspace}/tmp-kubeconfig"
+    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+        script {
+            def kubeConfigDir = '/var/lib/jenkins/workspace/devops-example/tmp-kubeconfig'
+            sh """
+                mkdir -p ${kubeConfigDir}
+                chmod 700 ${kubeConfigDir}
+                cp ${KUBECONFIG_FILE} ${kubeConfigDir}/config
+            """
+        }
+    }
+}
 
-                        sh """
-                            # Ensure the directory exists and has correct permissions
-                            mkdir -p ${kubeconfigDir}
-                            chmod 777 ${kubeconfigDir}
-
-                            # Copy KUBECONFIG file
-                            cp ${KUBECONFIG_FILE} ${kubeconfigDir}/config
-
-                            # Extract directory from KUBECONFIG path for additional files
-                            KUBE_DIR=\$(dirname "${KUBECONFIG_FILE}")
-
-                            echo "Copying client certificate and key files from \${KUBE_DIR} to ${kubeconfigDir}"
-
-                            # List files in KUBE_DIR for debugging
-                            echo "Listing files in \${KUBE_DIR}:"
-                            ls -la \${KUBE_DIR}
-
-                            if [ -f "\${KUBE_DIR}/client.crt" ]; then
-                                cp \${KUBE_DIR}/client.crt ${kubeconfigDir}/client.crt
-                            else
-                                echo "client.crt not found in \${KUBE_DIR}"
-                                exit 1
-                            fi
-
-                            if [ -f "\${KUBE_DIR}/client.key" ]; then
-                                cp \${KUBE_DIR}/client.key ${kubeconfigDir}/client.key
-                            else
-                                echo "client.key not found in \${KUBE_DIR}"
-                                exit 1
-                            fi
-
-                            # Update KUBECONFIG paths
-                            sed -i 's|/home/ola/.minikube/profiles/minikube/|${kubeconfigDir}/|g' ${kubeconfigDir}/config
-
-                            echo "KUBECONFIG file content:"
-                            cat ${kubeconfigDir}/config
-
-                            echo "Directory listing of ${kubeconfigDir}:"
-                            ls -la ${kubeconfigDir}
-
-                            export KUBECONFIG=${kubeconfigDir}/config
-                            kubectl apply -f deployment.yml
-                            kubectl apply -f service.yml
-                        """
-                    }
-                }
             }
         }
     }
