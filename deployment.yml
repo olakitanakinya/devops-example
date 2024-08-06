@@ -1,0 +1,35 @@
+# deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-example
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-example
+  template:
+    metadata:
+      labels:
+        app: devops-example
+    spec:
+      containers:
+      - name: devops-example
+        image: devops-example
+        ports:
+        - containerPort: 3000
+
+# service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-example-service
+spec:
+  selector:
+    app: devops-example
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+

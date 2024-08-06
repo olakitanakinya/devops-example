@@ -1,0 +1,9 @@
+# deploy.yml
+- hosts: localhost
+  tasks:
+    - name: Build Docker image
+      command: docker build -t devops-example .
+
+    - name: Run Docker container
+      command: docker run -d -p 3002:3000 --name devops-example-container devops-example
+
