@@ -24,7 +24,11 @@ pipeline {
                         def kubeconfigDir = "${workspace}/tmp-kubeconfig"
 
                         sh """
+                            # Ensure the directory exists and has correct permissions
                             mkdir -p ${kubeconfigDir}
+                            chmod 777 ${kubeconfigDir}
+
+                            # Copy KUBECONFIG file
                             cp ${KUBECONFIG_FILE} ${kubeconfigDir}/config
 
                             # Extract directory from KUBECONFIG path for additional files
@@ -50,6 +54,7 @@ pipeline {
                                 exit 1
                             fi
 
+                            # Update KUBECONFIG paths
                             sed -i 's|/home/ola/.minikube/profiles/minikube/|${kubeconfigDir}/|g' ${kubeconfigDir}/config
 
                             echo "KUBECONFIG file content:"
