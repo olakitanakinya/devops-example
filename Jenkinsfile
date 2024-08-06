@@ -18,10 +18,12 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
                         mkdir -p /tmp/kubeconfig
-                        cp $KUBECONFIG /tmp/kubeconfig/config
+                        cp $KUBECONFIG_FILE /tmp/kubeconfig/config
+                        # Ensuring all files referenced in the kubeconfig are accessible
+                        sed -i 's|/home/ola/.minikube/profiles/minikube/|/tmp/kubeconfig/|g' /tmp/kubeconfig/config
                         export KUBECONFIG=/tmp/kubeconfig/config
                         kubectl apply -f deployment.yml
                         kubectl apply -f service.yml
