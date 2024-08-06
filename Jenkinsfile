@@ -35,7 +35,8 @@ pipeline {
                             chmod 700 ${kubeconfigDir}
                             cp ${KUBECONFIG_FILE} ${kubeconfigDir}/config
                             export KUBECONFIG=${kubeconfigDir}/config
-                            kubectl apply -f deployment.yaml
+                            kubectl apply -f deployment.yml
+                            kubectl apply -f service.yml
                         """
                     }
                 }
