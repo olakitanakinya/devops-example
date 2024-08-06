@@ -4,6 +4,10 @@
     - name: Build Docker image
       command: docker build -t devops-example .
 
+    - name: Remove existing Docker container if it exists
+      command: docker rm -f devops-example-container
+      ignore_errors: yes
+
     - name: Run Docker container
       command: docker run -d -p 3002:3000 --name devops-example-container devops-example
 
