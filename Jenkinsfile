@@ -26,9 +26,9 @@ pipeline {
                             cp ${KUBECONFIG_FILE} ${workspace}/kubeconfig/config
 
                             # Extract directory from KUBECONFIG path for additional files
-                            KUBE_DIR=$(dirname "${KUBECONFIG_FILE}")
-                            cp ${KUBE_DIR}/client.crt ${workspace}/kubeconfig/client.crt
-                            cp ${KUBE_DIR}/client.key ${workspace}/kubeconfig/client.key
+                            KUBE_DIR=\$(dirname "${KUBECONFIG_FILE}")
+                            cp \${KUBE_DIR}/client.crt ${workspace}/kubeconfig/client.crt
+                            cp \${KUBE_DIR}/client.key ${workspace}/kubeconfig/client.key
 
                             sed -i 's|/home/ola/.minikube/profiles/minikube/|${workspace}/kubeconfig/|g' ${workspace}/kubeconfig/config
 
