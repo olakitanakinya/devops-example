@@ -21,24 +21,26 @@ pipeline {
                 withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_FILE')]) {
                     script {
                         def workspace = pwd()
+                        def kubeconfigDir = "${workspace}/tmp-kubeconfig"
+
                         sh """
-                            mkdir -p ${workspace}/kubeconfig
-                            cp ${KUBECONFIG_FILE} ${workspace}/kubeconfig/config
+                            mkdir -p ${kubeconfigDir}
+                            cp ${KUBECONFIG_FILE} ${kubeconfigDir}/config
 
                             # Extract directory from KUBECONFIG path for additional files
                             KUBE_DIR=\$(dirname "${KUBECONFIG_FILE}")
-                            cp \${KUBE_DIR}/client.crt ${workspace}/kubeconfig/client.crt
-                            cp \${KUBE_DIR}/client.key ${workspace}/kubeconfig/client.key
+                            cp \${KUBE_DIR}/client.crt ${kubeconfigDir}/client.crt
+                            cp \${KUBE_DIR}/client.key ${kubeconfigDir}/client.key
 
-                            sed -i 's|/home/ola/.minikube/profiles/minikube/|${workspace}/kubeconfig/|g' ${workspace}/kubeconfig/config
+                            sed -i 's|/home/ola/.minikube/profiles/minikube/|${kubeconfigDir}/|g' ${kubeconfigDir}/config
 
                             echo "KUBECONFIG file content:"
-                            cat ${workspace}/kubeconfig/config
+                            cat ${kubeconfigDir}/config
 
                             echo "Directory listing:"
-                            ls -la ${workspace}/kubeconfig
+                            ls -la ${kubeconfigDir}
 
-                            export KUBECONFIG=${workspace}/kubeconfig/config
+                            export KUBECONFIG=${kubeconfigDir}/config
                             kubectl apply -f deployment.yml
                             kubectl apply -f service.yml
                         """
