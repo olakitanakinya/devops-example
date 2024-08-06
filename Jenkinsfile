@@ -24,7 +24,20 @@ pipeline {
                         sh """
                             mkdir -p ${workspace}/kubeconfig
                             cp ${KUBECONFIG_FILE} ${workspace}/kubeconfig/config
+
+                            # Extract directory from KUBECONFIG path for additional files
+                            KUBE_DIR=$(dirname "${KUBECONFIG_FILE}")
+                            cp ${KUBE_DIR}/client.crt ${workspace}/kubeconfig/client.crt
+                            cp ${KUBE_DIR}/client.key ${workspace}/kubeconfig/client.key
+
                             sed -i 's|/home/ola/.minikube/profiles/minikube/|${workspace}/kubeconfig/|g' ${workspace}/kubeconfig/config
+
+                            echo "KUBECONFIG file content:"
+                            cat ${workspace}/kubeconfig/config
+
+                            echo "Directory listing:"
+                            ls -la ${workspace}/kubeconfig
+
                             export KUBECONFIG=${workspace}/kubeconfig/config
                             kubectl apply -f deployment.yml
                             kubectl apply -f service.yml
